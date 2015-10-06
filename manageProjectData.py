@@ -5,9 +5,12 @@ import os.path
 import sys
 import ConfigParser
 import json
+import time
 import StringIO as sio
 import zipfile as z
+from collections import OrderedDict
 from pypodio2 import api
+from string import Template
 
 ### Script automatically refreshes Podio projects and consultation data
 ### Pulls from Qualtrics API
@@ -65,9 +68,9 @@ class ProjectDataManager(object):
             print ("File %s not found." % config)
 
 
-    def extractQualtrics(self):
+    def extractTransformLoad(self):
         '''
-        Pull form data down from Qualtrics.
+        Pull form data down from Qualtrics, transform, and load to Podio.
         '''
 
         idRRF = 'SV_78KTbL61clEWsO9'
@@ -77,7 +80,7 @@ class ProjectDataManager(object):
         dataPRF = self.__getFormData(idPRF)
 
         return dataRRF, dataPRF
-        
+
 
     def __getFormData(self, surveyID):
         '''
@@ -118,17 +121,31 @@ class ProjectDataManager(object):
             return data
 
 
+    def __transformProjects(self, dataPRF):
+
+        projects = []
+
+        return None
+
+
+    def __transformConsults(self, dataRRF):
+
+        consults = []
+
+        return None
+
+
 
 if __name__ == '__main__':
     pdm = ProjectDataManager()
-    rrf, prf = pdm.extractQualtrics()
+    rrf, prf = pdm.extractTransformLoad()
+
     try:
         print rrf
     except:
         print "rrf failed"
-        continue
+
     try:
         print prf
     except:
         print "prf failed"
-        continue
