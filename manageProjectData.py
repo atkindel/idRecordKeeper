@@ -6,8 +6,10 @@ import sys
 import ConfigParser
 import json
 import time
+import datetime as dt
 import StringIO as sio
 import zipfile as z
+from datetime import timedelta
 from collections import OrderedDict
 from pypodio2 import api
 from string import Template
@@ -27,8 +29,10 @@ class ProjectDataManager(object):
         home = os.path.expanduser("~")
 
         self.qtUser, self.qtToken = self.__configQualtrics()
-        self.pdETL, self.pdKey, self.pdApp = self.__configPodio(home + '/.ssh/idrk.cfg')
+        self.pdETL, self.pdKey, self.pdApp, self.pdUsr, self.pdPwd = self.__configPodio(home + '/.ssh/idrk.cfg')
 
+
+## API config methods
 
     def __configQualtrics(self):
         '''
@@ -63,33 +67,28 @@ class ProjectDataManager(object):
             etl = config.get('APIKey', 'etl') # api app id
             key = config.get('APIKey', 'key') # api key
             app = config.get('APIKey', 'app') # podio internal app id
-            return etl, key, app
+            usr = config.get('PodioUser', 'p_user') # podio username
+            pwd = config.get('PodioUser', 'p_pass') # password
+            return etl, key, app, usr, pwd
         except IOError:
             print ("File %s not found." % config)
 
 
-    def extractTransformLoad(self):
-        '''
-        Pull form data down from Qualtrics, transform, and load to Podio.
-        '''
-
-        idRRF = 'SV_78KTbL61clEWsO9'
-        idPRF = 'SV_bftcKQJ9cGUyPI1'
-
-        dataRRF = self.__getFormData(idRRF)
-        dataPRF = self.__getFormData(idPRF)
-
-        return dataRRF, dataPRF
-
+## Extract method
 
     def __getFormData(self, surveyID):
         '''
-        Pull PRF form data down from Qualtrics. From qualtrics_etl.
+        Pull PRF/RRF form data down from Qualtrics. From qualtrics_etl.
+        Only requests responses that are less than one day old.
         Returns JSON object containing untransformed survey data.
         '''
 
-        urlTemp = Template("https://dc-viawest.qualtrics.com:443/API/v1/surveys/${svid}/responseExports?apiToken=${tk}&fileType=JSON")
-        reqURL = urlTemp.substitute(svid=surveyID, tk=self.qtToken)
+        today = dt.datetime.today()
+        yesterday = today - timedelta(days=1)
+        date = "%d-%d-%d" % (yesterday.year, yesterday.month, yesterday.day) # Responses should be <=1 day old
+
+        urlTemp = Template("https://dc-viawest.qualtrics.com:443/API/v1/surveys/${svid}/responseExports?apiToken=${tk}&fileType=JSON&startDate=${dt}+00:00:00")
+        reqURL = urlTemp.substitute(svid=surveyID, tk=self.qtToken, dt=date)
         req = json.loads(urllib2.urlopen(reqURL).read())
 
         statURL = req['result']['exportStatus'] + "?apiToken=" + self.qtToken
@@ -120,32 +119,217 @@ class ProjectDataManager(object):
         else:
             return data
 
+## Transform helper switches
+
+    def __mapProjType(self, number):
+        '''
+        Helper method for translating project type between formats.
+        '''
+        typemap = {
+            '1': "Repeat",
+            '2': "Derivative",
+            '3': "First Run"
+        }
+        return typemap.get(number)
+
+    def __backoutProjType(self, projtype):
+        '''
+        Takes a project type and changes it to the correct number.
+        '''
+        typemap = {
+            "Repeat": 2,
+            "Derivative": 3,
+            "First Run": 1
+        }
+        return typemap.get(projtype)
+
+
+## Transform methods
 
     def __transformProjects(self, dataPRF):
-
+        '''
+        Transform PRF data from Qualtrics to Podio schema.
+        Returns an array of dicts containing project data.
+        '''
         projects = []
+        for rawProj in dataPRF['responses']:
+            parsedProj = dict()
+            parsedProj['project-name'] = "TBD_%s" % rawProj.pop('Q2')
+            if parsedProj['project-name'] == "TBD_":
+                continue # Reject this entry if no project name was provided
 
-        return None
+            parsedProj['course-offering-type.text'] = self.__mapProjType(rawProj.pop('Q9'))
+            parsedProj['course-offering-type.id'] = self.__backoutProjType(parsedProj['course-offering-type.text'])
+            parsedProj['current-status'] = "<p>[%s]: PRF submitted.<br/></p>" % rawProj.pop('EndDate')
+            parsedProj['primary-contact.name'] = rawProj.pop('Q3')
+            parsedProj['primary-contact.mail'] = "%s@stanford.edu" % rawProj.pop('Q27')
+
+            if (parsedProj['course-offering-type.text'] == 'Repeat'):
+                parsedProj['derivative-of'] = rawProj.pop('Q12')
+                parsedProj['audience-notes'] = rawProj.pop('Q29')
+                parsedProj['short-description'] = "<p><b>Intended changes:</b> %s<br/><br/><b>Desired launch:</b> %s</p>" % (rawProj.pop('Q14'), rawProj.pop('Q13'))
+
+            if (parsedProj['course-offering-type.text'] == 'Derivative' or parsedProj['course-offering-type.text'] == 'First Run'):
+                parsedProj['audience-notes'] = rawProj.pop('Q35')
+                parsedProj['short-description'] = "<p><b>Project description:</b> %s<br/><br/><b>Impact:</b> %s<br/><br/><b>Support needed:</b> %s<br/><br/><b>Research/evaluation plans:</b> %s<br/><br/><b>Schedule:</b> %s</p>" % (rawProj.pop('Q15'), rawProj.pop('Q16'), rawProj.pop('Q17'), rawProj.pop('Q20'), rawProj.pop('Q21'))
+                parsedProj['funding-stipulations'] = rawProj.pop('Q36')
+                parsedProj['consult'] = rawProj.pop('Q18', "No one")
+
+            projects.append(parsedProj)
+        return projects
 
 
     def __transformConsults(self, dataRRF):
-
+        '''
+        Transform RRF data from Qualtrics to Podio schema.
+        Returns an array of dicts containing consult data.
+        '''
         consults = []
+        consults = None
+        return consults
 
-        return None
 
+## Load methods
+
+    def __loadProjects(self, projects):
+        '''
+        Load transformed PRF data to Podio.
+        Returns number of projects loaded.
+        '''
+
+        c = api.OAuthClient(self.pdETL, self.pdKey, self.pdUsr, self.pdPwd)
+        status = 0
+
+        for proj in projects:
+            item = {
+                    'fields':[
+                        {
+                         'external_id':'project-name',
+                         'values':[
+                            {'value': "%s" % proj.pop('project-name')}
+                         ]
+                        },
+                        {
+                         'external_id':'derivative-of',
+                         'values':[
+                            {'value': "%s" % proj.pop('derivative-of', 'n/a')}
+                         ]
+                        },
+                        {
+                         'external_id':'course-offering-type',
+                         'values':[
+                            {'value': proj.pop('course-offering-type.id')}
+                         ]
+                        },
+                        {
+                         'external_id':'overall-health',
+                         'values':[
+                            {'value': 11} # "Planning Phase"
+                         ]
+                        },
+                        {
+                         'external_id':'quarter-offered',
+                         'values':[
+                            {'value': 17} # "TBD"
+                         ]
+                        },
+                        {
+                         'external_id':'platform',
+                         'values':[
+                            {'value': 14} # "TBD"
+                         ]
+                        },
+                        {
+                         'external_id':'school',
+                         'values':[
+                            {'value': 7} # "Other"
+                         ]
+                        },
+                        {
+                         'external_id':'course-type',
+                         'values':[
+                            {'value': 8} # "TBD"
+                         ]
+                        },
+                        {
+                         'external_id':'delivery-format',
+                         'values':[
+                            {'value': 16} # "TBD"
+                         ]
+                        },
+                        {
+                         'external_id':'current-status',
+                         'values':[
+                            {'value': "%s" % proj.pop('current-status')}
+                         ]
+                        },
+                        {
+                         'external_id':'audience-notes',
+                         'values':[
+                            {'value': "%s" % proj.pop('audience-notes')}
+                         ]
+                        },
+                        {
+                         'external_id':'short-description',
+                         'values': [
+                            {'value': "%s" % proj.pop('short-description')}
+                         ]
+                        },
+                        {
+                         'external_id':'for-future-reference',
+                         'values': [
+                            {'value': "Submitted by %s (%s) <br/>%s" % (proj.pop('primary-contact.name'), proj.pop('primary-contact.mail'), proj.pop('consult', 'No one')+' listed on PRF as prior VPTL contact')}
+                         ]
+                        },
+                        {
+                         'external_id':'funding-stipulations',
+                         'values': [
+                            {'value': "%s" % proj.pop('funding-stipulations', 'n/a')}
+                         ]
+                        }
+                    ]
+            } # yes, this is really what it wants...
+
+            c.Item.create(int(self.pdApp), item)
+            status += 1
+
+        return status
+
+    def __loadConsults(self, consults):
+
+        status = 0
+
+        return status
+
+
+## User interface method
+
+    def extractTransformLoad(self):
+        '''
+        Pull form data down from Qualtrics, transform, and load to Podio.
+        '''
+
+        # Extract step
+        idRRF = 'SV_78KTbL61clEWsO9'
+        idPRF = 'SV_bftcKQJ9cGUyPI1'
+        dataRRF = self.__getFormData(idRRF)
+        dataPRF = self.__getFormData(idPRF)
+
+        # Transform step
+        consults = self.__transformConsults(dataRRF)
+        projects = self.__transformProjects(dataPRF)
+
+        # Load step
+        consStatus = self.__loadConsults(consults)
+        projStatus = self.__loadProjects(projects)
+
+        return consStatus, projStatus
 
 
 if __name__ == '__main__':
     pdm = ProjectDataManager()
-    rrf, prf = pdm.extractTransformLoad()
 
-    try:
-        print rrf
-    except:
-        print "rrf failed"
-
-    try:
-        print prf
-    except:
-        print "prf failed"
+    # Test transform method
+    consults, projects = pdm.extractTransformLoad();
+    print "Consults loaded: %d" % consults
+    print "Projects loaded: %d" % projects
