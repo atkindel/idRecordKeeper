@@ -29,7 +29,7 @@ class ProjectDataManager(object):
         home = os.path.expanduser("~")
 
         self.qtUser, self.qtToken = self.__configQualtrics()
-        self.pdETL, self.pdKey, self.pdApp, self.pdUsr, self.pdPwd = self.__configPodio(home + '/.ssh/idrk.cfg')
+        self.pdETL, self.pdKey, self.pdApp1, self.pdApp2, self.pdUsr, self.pdPwd = self.__configPodio(home + '/.ssh/idrk.cfg')
 
 
 ## API config methods
@@ -66,10 +66,11 @@ class ProjectDataManager(object):
             config.read(cfgpath)
             etl = config.get('APIKey', 'etl') # api app id
             key = config.get('APIKey', 'key') # api key
-            app = config.get('APIKey', 'app') # podio internal app id
+            app1 = config.get('APIKey', 'ap1') # podio internal app id for projects
+            app2 = config.get('APIKey', 'ap2') # podio internal app id for consults
             usr = config.get('PodioUser', 'p_user') # podio username
             pwd = config.get('PodioUser', 'p_pass') # password
-            return etl, key, app, usr, pwd
+            return etl, key, app1, app2, usr, pwd
         except IOError:
             print ("File %s not found." % config)
 
@@ -78,13 +79,13 @@ class ProjectDataManager(object):
 
     def __getFormData(self, surveyID):
         '''
-        Pull PRF/RRF form data down from Qualtrics. From qualtrics_etl.
+        Pull PRF/CRF form data down from Qualtrics. From qualtrics_etl.
         Only requests responses that are less than one day old.
         Returns JSON object containing untransformed survey data.
         '''
 
         today = dt.datetime.today()
-        yesterday = today - timedelta(days=1)
+        yesterday = today - timedelta(days=3)
         date = "%d-%d-%d" % (yesterday.year, yesterday.month, yesterday.day) # Responses should be <=1 day old
 
         urlTemp = Template("https://dc-viawest.qualtrics.com:443/API/v1/surveys/${svid}/responseExports?apiToken=${tk}&fileType=JSON&startDate=${dt}+00:00:00")
@@ -278,7 +279,7 @@ class ProjectDataManager(object):
                     ]
             } # yes, this is really what it wants...
 
-            c.Item.create(int(self.pdApp), item)
+            c.Item.create(int(self.pdApp1), item)
             status += 1
 
         return status
@@ -286,23 +287,88 @@ class ProjectDataManager(object):
 
 ## Transform and load consults
 
-    def __transformConsults(self, dataRRF):
+    def __transformConsults(self, dataCRF):
         '''
-        Transform RRF data from Qualtrics to Podio schema.
+        Transform CRF data from Qualtrics to Podio schema.
         Returns an array of dicts containing consult data.
         '''
         consults = []
-        consults = None
+        for rawCons in dataCRF['responses']:
+            parsedCons = dict()
+            parsedCons['email'] = "%s" % rawCons.pop('Q13')
+            parsedCons['title'] = "<p>%s</p>" % rawCons.pop('Q6')
+            parsedCons['school'] = "<p>%s</p>" % rawCons.pop('Q14')
+            parsedCons['description'] = "<p>%s</p>" % rawCons.pop('Q8')
+            parsedCons['link-to-crf'] = 'https://stanforduniversity.qualtrics.com/CP/Report.php?SID=SV_78KTbL61clEWsO9&R='+rawCons.pop('ResponseID')
+            parsedCons['comments'] = "<p><b>Contact name:</b> %s<br/><br/><b>Contact SUNet ID:</b> %s" % (rawCons.pop('Q10'), rawCons.pop('Q11'))
+            consults.append(parsedCons)
         return consults
 
-    def __loadConsults(self, consults):
 
+    def __loadConsults(self, consults):
+        '''
+        Load transformed CRF data to Podio.
+        Returns number of projects loaded.
+        '''
+
+        c = api.OAuthClient(self.pdETL, self.pdKey, self.pdUsr, self.pdPwd)
         status = 0
+
+        for cons in consults:
+            item = {
+                    'fields':[
+                        {
+                         'external_id':'what-is-the-title-of-your-project-or-course',
+                         'values':[
+                            {'value': "%s" % cons.pop('title')}
+                         ]
+                        },
+                        {
+                         'external_id':'what-is-the-school-department-and-program-if-relevant-t',
+                         'values':[
+                            {'value': "%s" % cons.pop('school')}
+                         ]
+                        },
+                        {
+                         'external_id':'what-would-you-like-to-discuss-during-this-consultation',
+                         'values':[
+                            {'value': "%s" % cons.pop('description')}
+                         ]
+                        },
+                        {
+                         'external_id':'status',
+                         'values':[
+                            {'value': 1} # Pending Assignment
+                         ]
+                        },
+                        {
+                         'external_id':'link-to-crf',
+                         'values':[
+                            {'url': "%s" % cons.pop('link-to-crf')}
+                         ]
+                        },
+                        {
+                         'external_id':'comments',
+                         'values':[
+                            {'value': "%s" % cons.pop('comments')}
+                         ]
+                        },
+                        {
+                         'external_id':'email',
+                         'values':[
+                            {'value': "%s" % cons.pop('email'),
+                             'type': "work"}
+                         ]
+                        }
+                    ]
+                }
+            c.Item.create(int(self.pdApp2), item)
+            status += 1
 
         return status
 
 
-## User interface method
+## User interface
 
     def extractTransformLoad(self):
         '''
@@ -310,13 +376,13 @@ class ProjectDataManager(object):
         '''
 
         # Extract step
-        idRRF = 'SV_78KTbL61clEWsO9'
+        idCRF = 'SV_78KTbL61clEWsO9'
         idPRF = 'SV_bftcKQJ9cGUyPI1'
-        dataRRF = self.__getFormData(idRRF)
+        dataCRF = self.__getFormData(idCRF)
         dataPRF = self.__getFormData(idPRF)
 
         # Transform step
-        consults = self.__transformConsults(dataRRF)
+        consults = self.__transformConsults(dataCRF)
         projects = self.__transformProjects(dataPRF)
 
         # Load step
@@ -326,10 +392,11 @@ class ProjectDataManager(object):
         return consStatus, projStatus
 
 
+
 if __name__ == '__main__':
     pdm = ProjectDataManager()
 
     # Test transform method
-    consults, projects = pdm.extractTransformLoad();
+    consults, projects = pdm.extractTransformLoad()
     print "Consults loaded: %d" % consults
     print "Projects loaded: %d" % projects
