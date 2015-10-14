@@ -74,7 +74,7 @@ class ProjectDataManager(object):
             print ("File %s not found." % config)
 
 
-## Extract method
+## Generic extract method
 
     def __getFormData(self, surveyID):
         '''
@@ -119,7 +119,8 @@ class ProjectDataManager(object):
         else:
             return data
 
-## Transform helper switches
+
+## Project transform helper switches
 
     def __mapProjType(self, number):
         '''
@@ -144,7 +145,7 @@ class ProjectDataManager(object):
         return typemap.get(projtype)
 
 
-## Transform methods
+## Transform and load projects
 
     def __transformProjects(self, dataPRF):
         '''
@@ -161,35 +162,22 @@ class ProjectDataManager(object):
             parsedProj['course-offering-type.text'] = self.__mapProjType(rawProj.pop('Q9'))
             parsedProj['course-offering-type.id'] = self.__backoutProjType(parsedProj['course-offering-type.text'])
             parsedProj['current-status'] = "<p>[%s]: PRF submitted.<br/></p>" % rawProj.pop('EndDate')
-            parsedProj['primary-contact.name'] = rawProj.pop('Q3')
-            parsedProj['primary-contact.mail'] = "%s@stanford.edu" % rawProj.pop('Q27')
+            parsedProj['short-description'] = "<p><b>Name of Primary Contact:</b> %s<br/><br/><b>Primary Contact SUNet ID:</b> %s<br/><br/><b>Name/Title/SUNet ID of Project Lead(s)/Instructor(s):</b> %s</p>" % (rawProj.pop('Q3'), rawProj.pop('Q27'), rawProj.pop('Q6'))
 
             if (parsedProj['course-offering-type.text'] == 'Repeat'):
                 parsedProj['derivative-of'] = rawProj.pop('Q12')
                 parsedProj['audience-notes'] = rawProj.pop('Q29')
-                parsedProj['short-description'] = "<p><b>Intended changes:</b> %s<br/><br/><b>Desired launch:</b> %s</p>" % (rawProj.pop('Q14'), rawProj.pop('Q13'))
+                parsedProj['short-description'] += "<p><b>Intended changes:</b> %s<br/><br/><b>Desired launch:</b> %s</p>" % (rawProj.pop('Q14'), rawProj.pop('Q13'))
 
             if (parsedProj['course-offering-type.text'] == 'Derivative' or parsedProj['course-offering-type.text'] == 'First Run'):
                 parsedProj['audience-notes'] = rawProj.pop('Q35')
-                parsedProj['short-description'] = "<p><b>Project description:</b> %s<br/><br/><b>Impact:</b> %s<br/><br/><b>Support needed:</b> %s<br/><br/><b>Research/evaluation plans:</b> %s<br/><br/><b>Schedule:</b> %s</p>" % (rawProj.pop('Q15'), rawProj.pop('Q16'), rawProj.pop('Q17'), rawProj.pop('Q20'), rawProj.pop('Q21'))
+                parsedProj['short-description'] += "<p><b>Project description:</b> %s<br/><br/><b>Impact:</b> %s<br/><br/><b>Support needed:</b> %s<br/><br/><b>Research/evaluation plans:</b> %s<br/><br/><b>Schedule:</b> %s</p>" % (rawProj.pop('Q15'), rawProj.pop('Q16'), rawProj.pop('Q17'), rawProj.pop('Q20'), rawProj.pop('Q21'))
                 parsedProj['funding-stipulations'] = rawProj.pop('Q36')
                 parsedProj['consult'] = rawProj.pop('Q18', "No one")
 
             projects.append(parsedProj)
         return projects
 
-
-    def __transformConsults(self, dataRRF):
-        '''
-        Transform RRF data from Qualtrics to Podio schema.
-        Returns an array of dicts containing consult data.
-        '''
-        consults = []
-        consults = None
-        return consults
-
-
-## Load methods
 
     def __loadProjects(self, projects):
         '''
@@ -224,7 +212,7 @@ class ProjectDataManager(object):
                         {
                          'external_id':'overall-health',
                          'values':[
-                            {'value': 11} # "Planning Phase"
+                            {'value': 17} # "New"
                          ]
                         },
                         {
@@ -278,7 +266,7 @@ class ProjectDataManager(object):
                         {
                          'external_id':'for-future-reference',
                          'values': [
-                            {'value': "Submitted by %s (%s) <br/>%s" % (proj.pop('primary-contact.name'), proj.pop('primary-contact.mail'), proj.pop('consult', 'No one')+' listed on PRF as prior VPTL contact')}
+                            {'value': "%s" % (proj.pop('consult', 'No one')+' listed on PRF as prior VPTL contact')}
                          ]
                         },
                         {
@@ -294,6 +282,18 @@ class ProjectDataManager(object):
             status += 1
 
         return status
+
+
+## Transform and load consults
+
+    def __transformConsults(self, dataRRF):
+        '''
+        Transform RRF data from Qualtrics to Podio schema.
+        Returns an array of dicts containing consult data.
+        '''
+        consults = []
+        consults = None
+        return consults
 
     def __loadConsults(self, consults):
 
