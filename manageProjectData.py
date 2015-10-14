@@ -85,7 +85,7 @@ class ProjectDataManager(object):
         '''
 
         today = dt.datetime.today()
-        yesterday = today - timedelta(days=3)
+        yesterday = today - timedelta(days=1)
         date = "%d-%d-%d" % (yesterday.year, yesterday.month, yesterday.day) # Responses should be <=1 day old
 
         urlTemp = Template("https://dc-viawest.qualtrics.com:443/API/v1/surveys/${svid}/responseExports?apiToken=${tk}&fileType=JSON&startDate=${dt}+00:00:00")
@@ -154,6 +154,8 @@ class ProjectDataManager(object):
         Returns an array of dicts containing project data.
         '''
         projects = []
+        if dataPRF is None:
+            return None
         for rawProj in dataPRF['responses']:
             parsedProj = dict()
             parsedProj['project-name'] = "TBD_%s" % rawProj.pop('Q2')
@@ -293,10 +295,12 @@ class ProjectDataManager(object):
         Returns an array of dicts containing consult data.
         '''
         consults = []
+        if dataCRF is None:
+            return None
         for rawCons in dataCRF['responses']:
             parsedCons = dict()
-            parsedCons['email'] = "%s" % rawCons.pop('Q13')
             parsedCons['title'] = "<p>%s</p>" % rawCons.pop('Q6')
+            parsedCons['email'] = "%s" % rawCons.pop('Q13')
             parsedCons['school'] = "<p>%s</p>" % rawCons.pop('Q14')
             parsedCons['description'] = "<p>%s</p>" % rawCons.pop('Q8')
             parsedCons['link-to-crf'] = 'https://stanforduniversity.qualtrics.com/CP/Report.php?SID=SV_78KTbL61clEWsO9&R='+rawCons.pop('ResponseID')
@@ -386,8 +390,14 @@ class ProjectDataManager(object):
         projects = self.__transformProjects(dataPRF)
 
         # Load step
-        consStatus = self.__loadConsults(consults)
-        projStatus = self.__loadProjects(projects)
+        if consults is not None:
+            consStatus = self.__loadConsults(consults)
+        else:
+            consStatus = 0
+        if projects is not None:
+            projStatus = self.__loadProjects(projects)
+        else:
+            projStatus = 0
 
         return consStatus, projStatus
 
