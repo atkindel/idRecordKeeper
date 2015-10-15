@@ -299,13 +299,13 @@ class ProjectDataManager(object):
             return None
         for rawCons in dataCRF['responses']:
             parsedCons = dict()
-            # parsedCons['contact-name'] = "%s" % rawCons.pop('Q10')
+            parsedCons['contact-name'] = "%s" % rawCons.pop('Q10')
             parsedCons['title'] = "<p>%s</p>" % rawCons.pop('Q6')
             parsedCons['email'] = "%s" % rawCons.pop('Q13')
             parsedCons['school'] = "<p>%s</p>" % rawCons.pop('Q14')
             parsedCons['description'] = "<p>%s</p>" % rawCons.pop('Q8')
             parsedCons['link-to-crf'] = 'https://stanforduniversity.qualtrics.com/CP/Report.php?SID=SV_78KTbL61clEWsO9&R='+rawCons.pop('ResponseID')
-            parsedCons['comments'] = "<p><b>Contact name:</b> %s<br/><br/><b>Contact SUNet ID:</b> %s" % (rawCons.pop('Q10'), rawCons.pop('Q11'))
+            parsedCons['comments'] = "<p><b>Contact name:</b> %s<br/><br/><b>Contact SUNet ID:</b> %s" % (parsedCons['contact-name'], rawCons.pop('Q11'))
             consults.append(parsedCons)
         return consults
 
@@ -322,12 +322,12 @@ class ProjectDataManager(object):
         for cons in consults:
             item = {
                     'fields':[
-                        # {
-                        #  'external_id':'contact-name',
-                        #  'values':[
-                        #     {'name': "%s" % cons.pop('contact-name')}
-                        #  ]
-                        # }, # This doesn't really work
+                        {
+                         'external_id':'contact',
+                         'values':[
+                            {'value': "%s" % cons.pop('contact-name')}
+                         ]
+                        },
                         {
                          'external_id':'what-is-the-title-of-your-project-or-course',
                          'values':[
