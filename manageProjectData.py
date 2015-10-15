@@ -299,6 +299,7 @@ class ProjectDataManager(object):
             return None
         for rawCons in dataCRF['responses']:
             parsedCons = dict()
+            # parsedCons['contact-name'] = "%s" % rawCons.pop('Q10')
             parsedCons['title'] = "<p>%s</p>" % rawCons.pop('Q6')
             parsedCons['email'] = "%s" % rawCons.pop('Q13')
             parsedCons['school'] = "<p>%s</p>" % rawCons.pop('Q14')
@@ -321,6 +322,12 @@ class ProjectDataManager(object):
         for cons in consults:
             item = {
                     'fields':[
+                        # {
+                        #  'external_id':'contact-name',
+                        #  'values':[
+                        #     {'name': "%s" % cons.pop('contact-name')}
+                        #  ]
+                        # }, # This doesn't really work
                         {
                          'external_id':'what-is-the-title-of-your-project-or-course',
                          'values':[
@@ -342,7 +349,7 @@ class ProjectDataManager(object):
                         {
                          'external_id':'status',
                          'values':[
-                            {'value': 1} # Pending Assignment
+                            {'value': 10} # New
                          ]
                         },
                         {
