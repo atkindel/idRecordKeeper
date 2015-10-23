@@ -29,7 +29,7 @@ class ProjectDataManager(object):
         home = os.path.expanduser("~")
 
         self.qtUser, self.qtToken = self.__configQualtrics()
-        self.pdETL, self.pdKey, self.pdApp1, self.pdApp2, self.pdUsr, self.pdPwd = self.__configPodio(home + '/.ssh/idrk.cfg')
+        self.pdETL, self.pdKey, self.pdApp3, self.pdApp2, self.pdUsr, self.pdPwd = self.__configPodio(home + '/.ssh/idrk.cfg')
 
 
 ## API config methods
@@ -66,11 +66,11 @@ class ProjectDataManager(object):
             config.read(cfgpath)
             etl = config.get('APIKey', 'etl') # api app id
             key = config.get('APIKey', 'key') # api key
-            app1 = config.get('APIKey', 'ap1') # podio internal app id for projects
+            app3 = config.get('APIKey', 'ap3') # podio internal app id for projects; ap1 deprecated
             app2 = config.get('APIKey', 'ap2') # podio internal app id for consults
             usr = config.get('PodioUser', 'p_user') # podio username
             pwd = config.get('PodioUser', 'p_pass') # password
-            return etl, key, app1, app2, usr, pwd
+            return etl, key, app3, app2, usr, pwd
         except IOError:
             print ("File %s not found." % config)
 
@@ -269,7 +269,7 @@ class ProjectDataManager(object):
                         {
                          'external_id':'for-future-reference',
                          'values': [
-                            {'value': "%s" % (proj.pop('consult', 'No one')+' listed on PRF as prior VPTL contact')}
+                            {'value': "Prior VPTL contacts, if any: %s" % proj.pop('consult', 'N/A')}
                          ]
                         },
                         {
@@ -279,9 +279,9 @@ class ProjectDataManager(object):
                          ]
                         }
                     ]
-            } # yes, this is really what it wants...
+            }
 
-            c.Item.create(int(self.pdApp1), item)
+            c.Item.create(int(self.pdApp3), item)
             status += 1
 
         return status
@@ -377,6 +377,16 @@ class ProjectDataManager(object):
             status += 1
 
         return status
+
+## Inspect item JSON
+
+    def inspectItem(self, itemID):
+        '''
+        Pull item from Qualtrics and print JSON to stdout.
+        '''
+        c = api.OAuthClient(self.pdETL, self.pdKey, self.pdUsr, self.pdPwd)
+        item = c.Item.find(itemID)
+        print json.dumps(item, indent=4)
 
 
 ## User interface
