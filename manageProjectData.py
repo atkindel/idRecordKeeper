@@ -280,13 +280,15 @@ class ProjectDataManager(object):
                         }
                     ]
             }
-            while True:
+            while tries < 20:
                 try:
                     c.Item.create(int(self.pdApp3), item)
                 except:
+                    tries += 1
                     continue
                 else:
-                    break
+                    print "API call failed, dumping JSON to log file."
+                    print item
             status += 1
 
         return status
@@ -378,13 +380,15 @@ class ProjectDataManager(object):
                         }
                     ]
                 }
-            while True:
+            while tries < 20:
                 try:
                     c.Item.create(int(self.pdApp2), item)
                 except:
+                    tries += 1
                     continue
                 else:
-                    break
+                    print "API call failed, dumping JSON to log file."
+                    print item
             status += 1
 
         return status
