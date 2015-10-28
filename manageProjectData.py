@@ -288,7 +288,7 @@ class ProjectDataManager(object):
                     continue
                 else:
                     print "API call failed, dumping JSON to log file."
-                    print item
+                    print json.dumps(item)
             status += 1
 
         return status
@@ -388,7 +388,7 @@ class ProjectDataManager(object):
                     continue
                 else:
                     print "API call failed, dumping JSON to log file."
-                    print item
+                    print json.dumps(item)
             status += 1
 
         return status
