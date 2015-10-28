@@ -280,8 +280,13 @@ class ProjectDataManager(object):
                         }
                     ]
             }
-
-            c.Item.create(int(self.pdApp3), item)
+            while True:
+                try:
+                    c.Item.create(int(self.pdApp3), item)
+                except:
+                    continue
+                else:
+                    break
             status += 1
 
         return status
@@ -373,7 +378,13 @@ class ProjectDataManager(object):
                         }
                     ]
                 }
-            c.Item.create(int(self.pdApp2), item)
+            while True:
+                try:
+                    c.Item.create(int(self.pdApp2), item)
+                except:
+                    continue
+                else:
+                    break
             status += 1
 
         return status
