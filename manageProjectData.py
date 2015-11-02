@@ -158,6 +158,7 @@ class ProjectDataManager(object):
         if dataPRF is None:
             return None
         for rawProj in dataPRF['responses']:
+            print json.dumps(rawProj, indent=4)
             parsedProj = dict()
             parsedProj['project-name'] = "TBD_%s" % rawProj.pop('Q2')
             if parsedProj['project-name'] == "TBD_":
