@@ -166,7 +166,8 @@ class ProjectDataManager(object):
 
             parsedProj['course-offering-type.text'] = self.__mapProjType(rawProj.pop('Q9'))
             parsedProj['course-offering-type.id'] = self.__backoutProjType(parsedProj['course-offering-type.text'])
-            parsedProj['current-status'] = "<p>[%s]: PRF submitted.<br/></p>" % rawProj.pop('EndDate')
+            date = rawProj.pop('EndDate')
+            parsedProj['current-status'] = "<p>[%s]: PRF submitted.<br/></p>" % date
             parsedProj['short-description'] = "<p><b>Name of Primary Contact:</b> %s<br/><br/><b>Primary Contact SUNet ID:</b> %s<br/><br/><b>Name/Title/SUNet ID of Project Lead(s)/Instructor(s):</b> %s</p>" % (rawProj.pop('Q3'), rawProj.pop('Q27'), rawProj.pop('Q6'))
 
             if (parsedProj['course-offering-type.text'] == 'Repeat'):
@@ -175,8 +176,8 @@ class ProjectDataManager(object):
                 parsedProj['short-description'] += "<p><b>Intended changes:</b> %s<br/><br/><b>Desired launch:</b> %s</p>" % (rawProj.pop('Q14'), rawProj.pop('Q13'))
 
             if (parsedProj['course-offering-type.text'] == 'Derivative' or parsedProj['course-offering-type.text'] == 'First Run'):
-                audience = rawProj.pop('Q35') + ""
-                parsedProj['audience-notes'] = audience if not audience else "n/a"
+                audience = "[%s]: %s" % (date, rawProj.pop('Q35'))
+                parsedProj['audience-notes'] = audience
                 parsedProj['short-description'] += "<p><b>Project description:</b> %s<br/><br/><b>Impact:</b> %s<br/><br/><b>Support needed:</b> %s<br/><br/><b>Research/evaluation plans:</b> %s<br/><br/><b>Schedule:</b> %s</p>" % (rawProj.pop('Q15'), rawProj.pop('Q16'), rawProj.pop('Q17'), rawProj.pop('Q20'), rawProj.pop('Q21'))
                 parsedProj['funding-stipulations'] = rawProj.pop('Q36')
                 parsedProj['consult'] = rawProj.pop('Q18', "No one")
