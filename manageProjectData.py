@@ -105,7 +105,7 @@ class ProjectDataManager(object):
             finally:
                 tries += 1
         if tries >= 20:
-            logging.error("Survey %s timed out." % surveyID)
+            print "Survey %s timed out." % surveyID
             return None
 
         dataURL = stat['result']['fileUrl']
@@ -436,9 +436,13 @@ class ProjectDataManager(object):
 
 
 if __name__ == '__main__':
+    # pdm = ProjectDataManager()
+    #
+    # # Test transform method
+    # consults, projects = pdm.extractTransformLoad()
+    # print "Consults loaded: %d" % consults
+    # print "Projects loaded: %d" % projects
+
     pdm = ProjectDataManager()
 
-    # Test transform method
-    consults, projects = pdm.extractTransformLoad()
-    print "Consults loaded: %d" % consults
-    print "Projects loaded: %d" % projects
+    pdm.inspectItem(340551445)
