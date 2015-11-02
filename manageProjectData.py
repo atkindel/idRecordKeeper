@@ -93,7 +93,8 @@ class ProjectDataManager(object):
         req = json.loads(urllib2.urlopen(reqURL).read())
 
         statURL = req['result']['exportStatus'] + "?apiToken=" + self.qtToken
-        percent, tries = 0, 0
+        percent = 0
+        tries = 0
         while percent != 100 and tries < 20:
             time.sleep(5) # Wait 5 seconds between attempts to acquire data
             try:
