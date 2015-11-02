@@ -285,6 +285,7 @@ class ProjectDataManager(object):
             while tries < 20:
                 try:
                     c.Item.create(int(self.pdApp3), item)
+                    print "Item created!"
                 except:
                     tries += 1
                     continue
