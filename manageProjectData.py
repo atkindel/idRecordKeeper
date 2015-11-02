@@ -158,7 +158,6 @@ class ProjectDataManager(object):
         if dataPRF is None:
             return None
         for rawProj in dataPRF['responses']:
-            print json.dumps(rawProj, indent=4)
             parsedProj = dict()
             parsedProj['project-name'] = "TBD_%s" % rawProj.pop('Q2')
             if parsedProj['project-name'] == "TBD_":
@@ -285,21 +284,11 @@ class ProjectDataManager(object):
                         }
                     ]
             }
-            print json.dumps(item, indent=4)
-            tries = 0
-            while tries < 20:
-                try:
-                    print "Creating item."
-                    c.Item.create(int(self.pdApp3), item)
-                    print "Item created!"
-                    status += 1
-                except Exception as e:
-                    print e
-                    tries += 1
-                    continue
-                else:
-                    print "API call failed, dumping JSON to log file."
-                    print json.dumps(item)
+            try:
+                c.Item.create(int(self.pdApp3), item)
+                status += 1
+            except:
+                print json.dumps(item)
 
         return status
 
@@ -390,17 +379,11 @@ class ProjectDataManager(object):
                         }
                     ]
                 }
-            tries = 0
-            while tries < 20:
                 try:
                     c.Item.create(int(self.pdApp2), item)
+                    status += 1
                 except:
-                    tries += 1
-                    continue
-                else:
-                    print "API call failed, dumping JSON to log file."
                     print json.dumps(item)
-            status += 1
 
         return status
 
