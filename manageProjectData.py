@@ -281,6 +281,7 @@ class ProjectDataManager(object):
                         }
                     ]
             }
+            print json.dumps(item)
             tries = 0
             while tries < 20:
                 try:
