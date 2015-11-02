@@ -436,13 +436,9 @@ class ProjectDataManager(object):
 
 
 if __name__ == '__main__':
-    # pdm = ProjectDataManager()
-    #
-    # # Test transform method
-    # consults, projects = pdm.extractTransformLoad()
-    # print "Consults loaded: %d" % consults
-    # print "Projects loaded: %d" % projects
-
     pdm = ProjectDataManager()
 
-    pdm.inspectItem(340551445)
+    # Test transform method
+    consults, projects = pdm.extractTransformLoad()
+    print "Consults loaded: %d" % consults
+    print "Projects loaded: %d" % projects
