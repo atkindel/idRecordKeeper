@@ -175,8 +175,8 @@ class ProjectDataManager(object):
                 parsedProj['short-description'] += "<p><b>Intended changes:</b> %s<br/><br/><b>Desired launch:</b> %s</p>" % (rawProj.pop('Q14'), rawProj.pop('Q13'))
 
             if (parsedProj['course-offering-type.text'] == 'Derivative' or parsedProj['course-offering-type.text'] == 'First Run'):
-                audience = rawProj.pop('Q35')
-                parsedProj['audience-notes'] = audience if len(audience) > 1 else "N/A"
+                audience = rawProj.pop('Q35') + ""
+                parsedProj['audience-notes'] = audience if not audience else "n/a"
                 parsedProj['short-description'] += "<p><b>Project description:</b> %s<br/><br/><b>Impact:</b> %s<br/><br/><b>Support needed:</b> %s<br/><br/><b>Research/evaluation plans:</b> %s<br/><br/><b>Schedule:</b> %s</p>" % (rawProj.pop('Q15'), rawProj.pop('Q16'), rawProj.pop('Q17'), rawProj.pop('Q20'), rawProj.pop('Q21'))
                 parsedProj['funding-stipulations'] = rawProj.pop('Q36')
                 parsedProj['consult'] = rawProj.pop('Q18', "No one")
