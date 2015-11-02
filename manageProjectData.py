@@ -281,6 +281,7 @@ class ProjectDataManager(object):
                         }
                     ]
             }
+            tries = 0
             while tries < 20:
                 try:
                     c.Item.create(int(self.pdApp3), item)
@@ -381,6 +382,7 @@ class ProjectDataManager(object):
                         }
                     ]
                 }
+            tries = 0
             while tries < 20:
                 try:
                     c.Item.create(int(self.pdApp2), item)
