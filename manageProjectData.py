@@ -198,7 +198,7 @@ class ProjectDataManager(object):
                         {
                          'external_id':'project-name',
                          'values':[
-                            {'value': """%s""" % proj.pop('project-name')}
+                            {'value': """%s""" % proj.pop('project-name', 'n/a')}
                          ]
                         },
                         {
@@ -210,7 +210,7 @@ class ProjectDataManager(object):
                         {
                          'external_id':'course-offering-type',
                          'values':[
-                            {'value': proj.pop('course-offering-type.id')}
+                            {'value': proj.pop('course-offering-type.id', 'n/a')}
                          ]
                         },
                         {
@@ -252,19 +252,19 @@ class ProjectDataManager(object):
                         {
                          'external_id':'current-status',
                          'values':[
-                            {'value': """%s""" % proj.pop('current-status')}
+                            {'value': """%s""" % proj.pop('current-status', 'n/a')}
                          ]
                         },
                         {
                          'external_id':'audience-notes',
                          'values':[
-                            {'value': """%s""" % proj.pop('audience-notes')}
+                            {'value': """%s""" % proj.pop('audience-notes', 'n/a')}
                          ]
                         },
                         {
                          'external_id':'short-description',
                          'values': [
-                            {'value': """%s""" % proj.pop('short-description')}
+                            {'value': """%s""" % proj.pop('short-description', 'n/a')}
                          ]
                         },
                         {
@@ -281,7 +281,7 @@ class ProjectDataManager(object):
                         }
                     ]
             }
-            print json.dumps(item)
+            print json.dumps(item, indent=4)
             tries = 0
             while tries < 20:
                 try:
@@ -338,25 +338,25 @@ class ProjectDataManager(object):
                         {
                          'external_id':'contact',
                          'values':[
-                            {'value': """%s""" % cons.pop('contact-name')}
+                            {'value': """%s""" % cons.pop('contact-name', 'n/a')}
                          ]
                         },
                         {
                          'external_id':'what-is-the-title-of-your-project-or-course',
                          'values':[
-                            {'value': """%s""" % cons.pop('title')}
+                            {'value': """%s""" % cons.pop('title', 'n/a')}
                          ]
                         },
                         {
                          'external_id':'what-is-the-school-department-and-program-if-relevant-t',
                          'values':[
-                            {'value': """%s""" % cons.pop('school')}
+                            {'value': """%s""" % cons.pop('school', 'n/a')}
                          ]
                         },
                         {
                          'external_id':'what-would-you-like-to-discuss-during-this-consultation',
                          'values':[
-                            {'value': """%s""" % cons.pop('description')}
+                            {'value': """%s""" % cons.pop('description', 'n/a')}
                          ]
                         },
                         {
@@ -368,19 +368,19 @@ class ProjectDataManager(object):
                         {
                          'external_id':'link-to-crf',
                          'values':[
-                            {'url': """%s""" % cons.pop('link-to-crf')}
+                            {'url': """%s""" % cons.pop('link-to-crf', 'n/a')}
                          ]
                         },
                         {
                          'external_id':'comments',
                          'values':[
-                            {'value': """%s""" % cons.pop('comments')}
+                            {'value': """%s""" % cons.pop('comments', 'n/a')}
                          ]
                         },
                         {
                          'external_id':'email',
                          'values':[
-                            {'value': """%s""" % cons.pop('email'),
+                            {'value': """%s""" % cons.pop('email', 'n/a'),
                              'type': "work"}
                          ]
                         }
