@@ -172,13 +172,13 @@ class ProjectDataManager(object):
 
             if (parsedProj['course-offering-type.text'] == 'Repeat'):
                 parsedProj['derivative-of'] = rawProj.pop('Q12')
-                parsedProj['audience-notes'] = rawProj.pop('Q29')
+                audience = "[%s]: %s" % (date, rawProj.pop('Q29'))
+                parsedProj['audience-notes'] = audience
                 parsedProj['short-description'] += "<p><b>Intended changes:</b> %s<br/><br/><b>Desired launch:</b> %s</p>" % (rawProj.pop('Q14'), rawProj.pop('Q13'))
 
             if (parsedProj['course-offering-type.text'] == 'Derivative' or parsedProj['course-offering-type.text'] == 'First Run'):
                 audience = "[%s]: %s" % (date, rawProj.pop('Q35'))
                 parsedProj['audience-notes'] = audience
-                print "Audience notes: %s" % parsedProj['audience-notes']
                 parsedProj['short-description'] += "<p><b>Project description:</b> %s<br/><br/><b>Impact:</b> %s<br/><br/><b>Support needed:</b> %s<br/><br/><b>Research/evaluation plans:</b> %s<br/><br/><b>Schedule:</b> %s</p>" % (rawProj.pop('Q15'), rawProj.pop('Q16'), rawProj.pop('Q17'), rawProj.pop('Q20'), rawProj.pop('Q21'))
                 parsedProj['funding-stipulations'] = rawProj.pop('Q36')
                 parsedProj['consult'] = rawProj.pop('Q18', "No one")
