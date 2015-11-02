@@ -198,13 +198,13 @@ class ProjectDataManager(object):
                         {
                          'external_id':'project-name',
                          'values':[
-                            {'value': "%s" % proj.pop('project-name')}
+                            {'value': """%s""" % proj.pop('project-name')}
                          ]
                         },
                         {
                          'external_id':'derivative-of',
                          'values':[
-                            {'value': "%s" % proj.pop('derivative-of', 'n/a')}
+                            {'value': """%s""" % proj.pop('derivative-of', 'n/a')}
                          ]
                         },
                         {
@@ -252,19 +252,19 @@ class ProjectDataManager(object):
                         {
                          'external_id':'current-status',
                          'values':[
-                            {'value': "%s" % proj.pop('current-status')}
+                            {'value': """%s""" % proj.pop('current-status')}
                          ]
                         },
                         {
                          'external_id':'audience-notes',
                          'values':[
-                            {'value': "%s" % proj.pop('audience-notes')}
+                            {'value': """%s""" % proj.pop('audience-notes')}
                          ]
                         },
                         {
                          'external_id':'short-description',
                          'values': [
-                            {'value': "%s" % proj.pop('short-description')}
+                            {'value': """%s""" % proj.pop('short-description')}
                          ]
                         },
                         {
@@ -276,7 +276,7 @@ class ProjectDataManager(object):
                         {
                          'external_id':'funding-stipulations',
                          'values': [
-                            {'value': "%s" % proj.pop('funding-stipulations', 'n/a')}
+                            {'value': """%s""" % proj.pop('funding-stipulations', 'n/a')}
                          ]
                         }
                     ]
@@ -312,9 +312,9 @@ class ProjectDataManager(object):
             return None
         for rawCons in dataCRF['responses']:
             parsedCons = dict()
-            parsedCons['contact-name'] = "%s" % rawCons.pop('Q10')
+            parsedCons['contact-name'] = """%s""" % rawCons.pop('Q10')
             parsedCons['title'] = "<p>%s</p>" % rawCons.pop('Q6')
-            parsedCons['email'] = "%s" % rawCons.pop('Q13')
+            parsedCons['email'] = """%s""" % rawCons.pop('Q13')
             parsedCons['school'] = "<p>%s</p>" % rawCons.pop('Q14')
             parsedCons['description'] = "<p>%s</p>" % rawCons.pop('Q8')
             parsedCons['link-to-crf'] = 'https://stanforduniversity.qualtrics.com/CP/Report.php?SID=SV_78KTbL61clEWsO9&R='+rawCons.pop('ResponseID')
@@ -338,25 +338,25 @@ class ProjectDataManager(object):
                         {
                          'external_id':'contact',
                          'values':[
-                            {'value': "%s" % cons.pop('contact-name')}
+                            {'value': """%s""" % cons.pop('contact-name')}
                          ]
                         },
                         {
                          'external_id':'what-is-the-title-of-your-project-or-course',
                          'values':[
-                            {'value': "%s" % cons.pop('title')}
+                            {'value': """%s""" % cons.pop('title')}
                          ]
                         },
                         {
                          'external_id':'what-is-the-school-department-and-program-if-relevant-t',
                          'values':[
-                            {'value': "%s" % cons.pop('school')}
+                            {'value': """%s""" % cons.pop('school')}
                          ]
                         },
                         {
                          'external_id':'what-would-you-like-to-discuss-during-this-consultation',
                          'values':[
-                            {'value': "%s" % cons.pop('description')}
+                            {'value': """%s""" % cons.pop('description')}
                          ]
                         },
                         {
@@ -368,19 +368,19 @@ class ProjectDataManager(object):
                         {
                          'external_id':'link-to-crf',
                          'values':[
-                            {'url': "%s" % cons.pop('link-to-crf')}
+                            {'url': """%s""" % cons.pop('link-to-crf')}
                          ]
                         },
                         {
                          'external_id':'comments',
                          'values':[
-                            {'value': "%s" % cons.pop('comments')}
+                            {'value': """%s""" % cons.pop('comments')}
                          ]
                         },
                         {
                          'external_id':'email',
                          'values':[
-                            {'value': "%s" % cons.pop('email'),
+                            {'value': """%s""" % cons.pop('email'),
                              'type': "work"}
                          ]
                         }
