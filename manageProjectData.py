@@ -285,15 +285,17 @@ class ProjectDataManager(object):
             tries = 0
             while tries < 20:
                 try:
+                    print "Creating item."
                     c.Item.create(int(self.pdApp3), item)
                     print "Item created!"
-                except:
+                    status += 1
+                except Exception as e:
+                    print e
                     tries += 1
                     continue
                 else:
                     print "API call failed, dumping JSON to log file."
                     print json.dumps(item)
-            status += 1
 
         return status
 
