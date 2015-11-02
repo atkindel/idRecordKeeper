@@ -379,11 +379,11 @@ class ProjectDataManager(object):
                         }
                     ]
                 }
-                try:
-                    c.Item.create(int(self.pdApp2), item)
-                    status += 1
-                except:
-                    print json.dumps(item)
+            try:
+                c.Item.create(int(self.pdApp2), item)
+                status += 1
+            except:
+                print json.dumps(item)
 
         return status
 
