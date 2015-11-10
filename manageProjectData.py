@@ -167,19 +167,19 @@ class ProjectDataManager(object):
             parsedProj['course-offering-type.id'] = self.__backoutProjType(parsedProj['course-offering-type.text'])
             date = rawProj.pop('EndDate')
             parsedProj['current-status'] = "<p>[%s]: PRF submitted.<br/></p>" % date
-            parsedProj['short-description'] = "<p><b>Name of Primary Contact:</b> %s<br/><br/><b>Primary Contact SUNet ID:</b> %s<br/><br/><b>Name/Title/SUNet ID of Project Lead(s)/Instructor(s):</b> %s</p>" % (rawProj.pop('Q3'), rawProj.pop('Q27'), rawProj.pop('Q6'))
+            parsedProj['short-description'] = "<p><b>Name of Primary Contact:</b> %s<br/><br/><b>Primary Contact SUNet ID:</b> %s<br/><br/><b>Name/Title/SUNet ID of Project Lead(s)/Instructor(s):</b> %s</p>" % (rawProj.pop('Q3', 'NA'), rawProj.pop('Q27', 'NA'), rawProj.pop('Q6', 'NA'))
 
             if (parsedProj['course-offering-type.text'] == 'Repeat'):
-                parsedProj['derivative-of'] = rawProj.pop('Q12')
-                audience = "[%s]: %s" % (date, rawProj.pop('Q29'))
+                parsedProj['derivative-of'] = rawProj.pop('Q12', 'NA')
+                audience = "[%s]: %s" % (date, rawProj.pop('Q29', 'NA'))
                 parsedProj['audience-notes'] = audience
-                parsedProj['short-description'] += "<p><b>Intended changes:</b> %s<br/><br/><b>Desired launch:</b> %s</p>" % (rawProj.pop('Q14'), rawProj.pop('Q13'))
+                parsedProj['short-description'] += "<p><b>Intended changes:</b> %s<br/><br/><b>Desired launch:</b> %s</p>" % (rawProj.pop('Q14', 'NA'), rawProj.pop('Q13', 'NA'))
 
             if (parsedProj['course-offering-type.text'] == 'Derivative' or parsedProj['course-offering-type.text'] == 'First Run'):
-                audience = "[%s]: %s" % (date, rawProj.pop('Q35'))
+                audience = "[%s]: %s" % (date, rawProj.pop('Q35', 'NA'))
                 parsedProj['audience-notes'] = audience
-                parsedProj['short-description'] += "<p><b>Project description:</b> %s<br/><br/><b>Impact:</b> %s<br/><br/><b>Support needed:</b> %s<br/><br/><b>Research/evaluation plans:</b> %s<br/><br/><b>Schedule:</b> %s</p>" % (rawProj.pop('Q15'), rawProj.pop('Q16'), rawProj.pop('Q17'), rawProj.pop('Q20'), rawProj.pop('Q21'))
-                parsedProj['funding-stipulations'] = rawProj.pop('Q36')
+                parsedProj['short-description'] += "<p><b>Project description:</b> %s<br/><br/><b>Impact:</b> %s<br/><br/><b>Support needed:</b> %s<br/><br/><b>Research/evaluation plans:</b> %s<br/><br/><b>Schedule:</b> %s</p>" % (rawProj.pop('Q15', 'NA'), rawProj.pop('Q16', 'NA'), rawProj.pop('Q17', 'NA'), rawProj.pop('Q20', 'NA'), rawProj.pop('Q21', 'NA'))
+                parsedProj['funding-stipulations'] = rawProj.pop('Q36', 'NA')
                 parsedProj['consult'] = rawProj.pop('Q18', "No one")
 
             projects.append(parsedProj)
