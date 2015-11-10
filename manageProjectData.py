@@ -87,8 +87,9 @@ class ProjectDataManager(object):
         today = dt.datetime.today()
         yesterday = today - timedelta(days=1)
         date = "%d-%d-%d" % (yesterday.year, yesterday.month, yesterday.day) # Responses should be <=1 day old
+        print date
 
-        urlTemp = Template("https://dc-viawest.qualtrics.com:443/API/v1/surveys/${svid}/responseExports?apiToken=${tk}&fileType=JSON&startDate=${dt}+00:00:00")
+        urlTemp = Template("https://dc-viawest.qualtrics.com:443/API/v1/surveys/${svid}/responseExports?apiToken=${tk}&fileType=JSON&startDate=${dt}+06:00:00")
         reqURL = urlTemp.substitute(svid=surveyID, tk=self.qtToken, dt=date)
         req = json.loads(urllib2.urlopen(reqURL).read())
 
